@@ -1,38 +1,54 @@
-import { createSlice, nanoid } from "@reduxjs/toolkit";
-import initialContacts from "../assets/contacts.json";
-import { formatPhoneNumber } from "../assets/helpers/formatPhoneNum";
+import { createSlice, isAnyOf } from "@reduxjs/toolkit";
+import { fetchContacts, addContact, deleteContact } from "./contactsOps";
 
 const initialState = {
-  contacts: initialContacts,
+  contacts: [],
+  loading: false,
+  error: null,
 };
-
 const contactsSlice = createSlice({
   name: "contacts",
   initialState,
-  selectors: {
-    selectContacts: (state) => state.contacts,
-  },
-  reducers: {
-    deleteContact: (state, { payload }) => {
-      state.contacts = state.contacts.filter((item) => item.id !== payload);
-    },
-    addNewContact: {
-      prepare: (newContact) => {
-        return {
-          payload: {
-            id: nanoid(),
-            name: newContact.name,
-            number: formatPhoneNumber(newContact.number),
-          },
-        };
-      },
-      reducer: (state, { payload }) => {
+
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchContacts.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.contacts = payload;
+      })
+      .addCase(addContact.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
         state.contacts.unshift(payload);
-      },
-    },
+      })
+      .addCase(deleteContact.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.contacts = state.contacts.filter((item) => item.id !== payload);
+      })
+
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.rejected,
+          addContact.rejected,
+          deleteContact.rejected
+        ),
+        (state, { payload }) => {
+          state.loading = false;
+          state.error = payload;
+        }
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.pending,
+          addContact.pending,
+          deleteContact.pending
+        ),
+        (state) => {
+          state.loading = true;
+          state.error = false;
+        }
+      );
   },
 });
 
 export const contactsReducer = contactsSlice.reducer;
-export const { deleteContact, addNewContact } = contactsSlice.actions;
-export const { selectContacts } = contactsSlice.selectors;

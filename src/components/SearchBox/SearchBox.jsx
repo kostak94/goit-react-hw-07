@@ -1,6 +1,7 @@
 import css from "../PhoneBook.module.css";
 import { useSelector, useDispatch } from "react-redux";
-import { changeFilter, selectFilters } from "../../redux/filtersSlice";
+import { changeFilter } from "../../redux/filtersSlice";
+import { selectFilters } from "../../redux/selectors";
 
 const SearchBox = () => {
   const filters = useSelector(selectFilters);

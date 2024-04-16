@@ -1,8 +1,17 @@
 import { HiPhone } from "react-icons/hi2";
 import { HiUser } from "react-icons/hi";
-import css from "../PhoneBook.module.css";
+import { useDispatch } from "react-redux";
 
-const Contact = ({ item, deleteContact }) => {
+import css from "../PhoneBook.module.css";
+import { formatPhoneNumber } from "../../assets/helpers/formatPhoneNum";
+import { deleteContact } from "../../redux/contactsOps";
+
+const Contact = ({ item }) => {
+  const dispatch = useDispatch();
+  const handleDelete = () => {
+    dispatch(deleteContact(item.id));
+  };
+
   return (
     <li className={css.item}>
       <div className={css.flex_container}>
@@ -12,14 +21,10 @@ const Contact = ({ item, deleteContact }) => {
         </div>
         <div className={css.flex}>
           <HiPhone size={18} />
-          <p>{item.number}</p>
+          <p>{formatPhoneNumber(item.number)}</p>
         </div>
       </div>
-      <button
-        className={css.btn_delete}
-        onClick={() => deleteContact(item.id)}
-        type="button"
-      >
+      <button className={css.btn_delete} onClick={handleDelete} type="button">
         Delete
       </button>
     </li>
